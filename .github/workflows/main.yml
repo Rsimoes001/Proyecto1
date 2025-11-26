@@ -9,6 +9,7 @@ on:
 env:
   IMAGE_NAME: proyecto1-app
   IMAGE_TAG: latest
+  APP_SOURCE_DIR: app_source/ # <--- ¡AÑADIDO! Directorio de la aplicación
 
 jobs:
   # =================================================================
@@ -25,22 +26,28 @@ jobs:
         with:
           node-version: '18'
 
+      # CORRECCIÓN: Usa working-directory para encontrar package.json
       - name: Instalar Dependencias
         run: npm install
+        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX: Busca el package.json aquí
 
-      # --- PASOS DE SEGURIDAD (Mismos que antes) ---
+      # --- PASOS DE SEGURIDAD ---
 
       - name: 🔒 Análisis Estático de Código (ESLint)
-        run: npx eslint .
+        # Usamos 'npm run lint' definido en package.json
+        run: npm run lint
+        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         uses: snyk/actions/node@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} # Sigue siendo necesario para Snyk
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
+          project: ${{ env.APP_SOURCE_DIR }} # <-- FIX: Snyk busca en el subdirectorio
 
       - name: 📜 Generar SBOM (CycloneDX)
+        # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
         uses: anchore/sbom-action@main
         with:
           format: cyclonedx
@@ -48,19 +55,24 @@ jobs:
 
       - name: ✅ Ejecutar Tests de Unidad/Integración
         run: npm test
+        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
       # --- CONSTRUCCIÓN Y TAGGING LOCAL ---
 
       - name: 🐳 Construir Imagen Docker
+        # El contexto (el punto '.') debe ser la carpeta donde está el Dockerfile
         run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
-      - name: Subir SBOM y Código como Artefactos
+      - name: Subir SBOM y Archivos de Infraestructura como Artefactos
         uses: actions/upload-artifact@v4
         with:
           name: deployment-artifacts
           path: |
             sbom.json
-            ./ # Para incluir el Dockerfile y Terraform
+            infra/ # Carpeta Terraform
+            ${{ env.APP_SOURCE_DIR }}Dockerfile # Dockerfile específico
+            ${{ env.APP_SOURCE_DIR }} # El código fuente de la app
 
   # =================================================================
   # 2. Despliegue con Terraform
@@ -69,17 +81,18 @@ jobs:
       needs: security_and_build
       runs-on: ubuntu-latest
       env:
-        TERRAFORM_DIR: infra/ # Define la carpeta de Terraform
+        TERRAFORM_DIR: infra/
         IMAGE_NAME: proyecto1-app
         IMAGE_TAG: latest
+        APP_SOURCE_DIR: app_source/ # <--- ¡AÑADIDO!
       steps:
-        - name: Descargar Código y Terraform
+        - name: Checkout Código Fuente y Terraform
           uses: actions/checkout@v4
 
-      # Importante: Como cada job usa un runner limpio, volvemos a construir
-      # la imagen. Esto es seguro y garantiza que esté disponible para Docker.
+      # CORRECCIÓN: Necesita working-directory para encontrar el Dockerfile de nuevo
         - name: 🐳 Re-construir Imagen Docker (para este runner)
           run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+          working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
         - name: Instalar Terraform
           uses: hashicorp/setup-terraform@v3
