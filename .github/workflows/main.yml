@@ -1,0 +1,97 @@
+name: CI/CD Pipeline - Despliegue Local
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: proyecto1-app
+  IMAGE_TAG: latest
+
+jobs:
+  # =================================================================
+  # 1. Seguridad y Build (Combinado)
+  # =================================================================
+  security_and_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código Fuente
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Instalar Dependencias
+        run: npm install
+
+      # --- PASOS DE SEGURIDAD (Mismos que antes) ---
+
+      - name: 🔒 Análisis Estático de Código (ESLint)
+        run: npx eslint .
+
+      - name: 🔒 Análisis de Vulnerabilidades (Snyk)
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} # Sigue siendo necesario para Snyk
+        with:
+          command: test
+
+      - name: 📜 Generar SBOM (CycloneDX)
+        uses: anchore/sbom-action@v3
+        with:
+          format: cyclonedx
+          output-file: sbom.json
+
+      - name: ✅ Ejecutar Tests de Unidad/Integración
+        run: npm test
+
+      # --- CONSTRUCCIÓN Y TAGGING LOCAL ---
+
+      - name: 🐳 Construir Imagen Docker
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+
+      - name: Subir SBOM y Código como Artefactos
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-artifacts
+          path: |
+            sbom.json
+            ./ # Para incluir el Dockerfile y Terraform
+
+  # =================================================================
+  # 2. Despliegue con Terraform
+  # =================================================================
+  deploy_local:
+      needs: security_and_build
+      runs-on: ubuntu-latest
+      env:
+        TERRAFORM_DIR: infra/ # Define la carpeta de Terraform
+        IMAGE_NAME: proyecto1-app
+        IMAGE_TAG: latest
+      steps:
+        - name: Descargar Código y Terraform
+          uses: actions/checkout@v4
+
+      # Importante: Como cada job usa un runner limpio, volvemos a construir
+      # la imagen. Esto es seguro y garantiza que esté disponible para Docker.
+        - name: 🐳 Re-construir Imagen Docker (para este runner)
+          run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+
+        - name: Instalar Terraform
+          uses: hashicorp/setup-terraform@v3
+          with:
+            terraform_version: 1.6.0
+
+      # 🛠️ Terraform Init
+        - name: 🛠️ Terraform Init
+          run: terraform init
+          working-directory: ${{ env.TERRAFORM_DIR }}
+
+      # 🚀 Terraform Apply (Desplegar el stack de App, Prometheus y Grafana)
+        - name: 🚀 Terraform Apply
+          run: terraform apply -auto-approve
+          working-directory: ${{ env.TERRAFORM_DIR }}

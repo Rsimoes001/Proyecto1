@@ -1,0 +1,92 @@
+name: CI/CD Project 1 - Despliegue Local
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: proyecto1-app
+  IMAGE_TAG: latest
+  TERRAFORM_DIR: infra/ # Carpeta donde están tus archivos .tf
+
+jobs:
+  # =================================================================
+  # 1. Seguridad, Build y Upload de Artefactos (incluye la imagen)
+  # =================================================================
+  security_and_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código Fuente
+        uses: actions/checkout@v4
+
+      - name: Instalar Dependencias y Ejecutar Tests (Node.js)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install
+      - run: npx eslint . # 🔒 Análisis Estático
+      - uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test # 🔒 Análisis de Vulnerabilidades
+
+      - name: 📜 Generar SBOM (CycloneDX)
+        uses: anchore/sbom-action@v3
+        with:
+          format: cyclonedx
+          output-file: sbom.json
+
+      - name: ✅ Ejecutar Tests
+        run: npm test
+
+      - name: 🐳 Construir Imagen Docker
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
+
+      # --- GUARDAR ARTEFACTOS ---
+      - name: Guardar Imagen Docker como Artefacto
+        run: docker save ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} -o ${{ env.IMAGE_NAME }}.tar
+
+      - name: Subir Archivos (SBOM, Dockerfile, Terraform, Imagen TAR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-artifacts
+          path: |
+            sbom.json
+            ${{ env.IMAGE_NAME }}.tar
+            ${{ env.TERRAFORM_DIR }}
+            Dockerfile
+            README.md # Para la documentación
+
+  # =================================================================
+  # 2. Despliegue con Terraform Local (usando la imagen guardada)
+  # =================================================================
+  deploy_local:
+      needs: security_and_build
+      runs-on: ubuntu-latest
+      steps:
+        - name: Descargar Artefactos
+          uses: actions/download-artifact@v4
+          with:
+            name: deployment-artifacts
+
+        - name: 🐳 Cargar Imagen Docker para el Runner
+          run: docker load -i ${{ env.IMAGE_NAME }}.tar
+
+        - name: Instalar Terraform
+          uses: hashicorp/setup-terraform@v3
+
+        # 🛠️ Terraform Init
+        - name: 🛠️ Terraform Init
+          run: terraform init
+          working-directory: ${{ env.TERRAFORM_DIR }}
+
+        # 🚀 Terraform Apply (Despliega App + Prometheus + Grafana)
+        - name: 🚀 Terraform Apply
+          run: terraform apply -auto-approve
+          working-directory: ${{ env.TERRAFORM_DIR }}
+
+        # ⚠️ IMPORTANTE: Necesitas un paso final para demostrar el resultado 
+        # y generar las capturas/logs que son entregables clave.
