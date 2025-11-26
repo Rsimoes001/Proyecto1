@@ -41,7 +41,7 @@ jobs:
           command: test
 
       - name: 📜 Generar SBOM (CycloneDX)
-        uses: anchore/sbom-action@v4
+        uses: anchore/sbom-action@main
         with:
           format: cyclonedx
           output-file: sbom.json
