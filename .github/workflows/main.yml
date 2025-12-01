@@ -102,7 +102,7 @@ jobs:
 
       # 🛠️ Terraform Init
         - name: 🛠️ Terraform Init
-          run: terraform init
+          run: terraform init -upgrade
           working-directory: ${{ env.TERRAFORM_DIR }}
 
       # 🚀 Terraform Apply (Desplegar el stack de App, Prometheus y Grafana)
