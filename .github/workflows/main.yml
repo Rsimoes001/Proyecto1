@@ -99,7 +99,12 @@ jobs:
           uses: hashicorp/setup-terraform@v3
           with:
             terraform_version: 1.6.0
-
+            
+# ➡️ PASO AÑADIDO: Eliminar el bloqueo de versión antiguo
+        - name: 🗑️ Eliminar Bloqueo de Terraform
+          run: rm -f .terraform.lock.hcl
+          working-directory: ${{ env.TERRAFORM_DIR }} # Ejecutar dentro de la carpeta infra/
+      
       # 🛠️ Terraform Init
         - name: 🛠️ Terraform Init
         # Añadimos la variable de entorno para ignorar el error de PGP: key expired
