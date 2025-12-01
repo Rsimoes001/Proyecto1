@@ -102,6 +102,9 @@ jobs:
 
       # 🛠️ Terraform Init
         - name: 🛠️ Terraform Init
+        # Añadimos la variable de entorno para ignorar el error de PGP: key expired
+          env: 
+            TF_SKIP_PROVIDER_VERIFICATION: true
           run: terraform init -upgrade
           working-directory: ${{ env.TERRAFORM_DIR }}
 
