@@ -53,7 +53,6 @@ describe('API Endpoints', () => {
         // Asegura que la respuesta contiene métricas personalizadas
         expect(res.text).to.include('app_predictions_total');
         expect(res.text).to.include('app_prediction_latency_seconds');
-                
         done();
       });
   });
