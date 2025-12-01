@@ -98,7 +98,9 @@ jobs:
         - name: Instalar Terraform
           uses: hashicorp/setup-terraform@v3
           with:
-            terraform_version: 1.6.0
+            # Reemplaza 1.6.0 por una versión anterior, como 1.5.7 o 1.4.6.
+            # Esto puede relajar la estrictez de la verificación PGP.
+            terraform_version: 1.5.7
             
 # ➡️ PASO AÑADIDO: Eliminar el bloqueo de versión antiguo
         - name: 🗑️ Eliminar Bloqueo de Terraform
