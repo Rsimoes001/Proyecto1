@@ -77,43 +77,35 @@ jobs:
 
   # =================================================================
   # 2. Despliegue con Terraform
-# =================================================================
-deploy_local:
-    needs: security_and_build
-    runs-on: ubuntu-latest
-    env:
+  # =================================================================
+  deploy_local:
+      needs: security_and_build
+      runs-on: ubuntu-latest
+      env:
         TERRAFORM_DIR: infra/
         IMAGE_NAME: proyecto1-app
         IMAGE_TAG: latest
-        APP_SOURCE_DIR: app_source/ 
-    steps:
+        APP_SOURCE_DIR: app_source/ # <--- ¡AÑADIDO!
+      steps:
         - name: Checkout Código Fuente y Terraform
           uses: actions/checkout@v4
-          
-        # CORRECCIÓN: Necesita working-directory para encontrar el Dockerfile de nuevo
+
+      # CORRECCIÓN: Necesita working-directory para encontrar el Dockerfile de nuevo
         - name: 🐳 Re-construir Imagen Docker (para este runner)
           run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
           working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
-          
+
         - name: Instalar Terraform
           uses: hashicorp/setup-terraform@v3
           with:
             terraform_version: 1.6.0
-            
-        # 🗑️ NUEVO PASO: Eliminar bloqueo de versión
-        # Esto soluciona el error 'openpgp: key expired' al forzar a Terraform a regenerar
-        # la dependencia del proveedor `kreuzwerker/docker`.
-        - name: 🗑️ Eliminar Bloqueo de Terraform
-          run: rm -f .terraform.lock.hcl
-          working-directory: ${{ env.TERRAFORM_DIR }}
-            
-        # 🛠️ Terraform Init
+
+      # 🛠️ Terraform Init
         - name: 🛠️ Terraform Init
-          # El flag -upgrade es esencial junto con la eliminación del archivo de bloqueo
           run: terraform init -upgrade
           working-directory: ${{ env.TERRAFORM_DIR }}
-          
-        # 🚀 Terraform Apply (Desplegar el stack de App, Prometheus y Grafana)
+
+      # 🚀 Terraform Apply (Desplegar el stack de App, Prometheus y Grafana)
         - name: 🚀 Terraform Apply
           run: terraform apply -auto-approve
           working-directory: ${{ env.TERRAFORM_DIR }}
