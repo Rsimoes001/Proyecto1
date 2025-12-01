@@ -5,7 +5,7 @@ terraform {
     # Usamos el proveedor Docker para gestionar recursos locales (contenedores)
     docker = {
       source  = "kreuzwerker/docker"
-      version = "~> 4.0"
+      version = "~> 3.7"
     }
   }
 }
