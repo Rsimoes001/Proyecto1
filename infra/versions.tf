@@ -2,10 +2,10 @@
 
 terraform {
   required_providers {
-    # Usamos el proveedor Docker para gestionar recursos locales (contenedores)
     docker = {
       source  = "kreuzwerker/docker"
-      #version = "~> 3.9.0"
+      # Usaremos >= 3.7.0 (mayor o igual a 3.7.0)
+      version = ">= 3.7.0"
     }
   }
 }
