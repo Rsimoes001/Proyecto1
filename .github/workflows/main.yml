@@ -44,7 +44,8 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          project: ${{ env.APP_SOURCE_DIR }} # <-- FIX: Snyk busca en el subdirectorio
+          # ¡CORRECCIÓN! Indicamos la ruta exacta del package.json
+          args: --file=app_source/package.json
 
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
