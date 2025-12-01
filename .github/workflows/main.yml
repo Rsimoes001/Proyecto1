@@ -80,7 +80,7 @@ jobs:
   # =================================================================
   deploy_local:
       needs: security_and_build
-      runs-on: ubuntu-latest
+      runs-on: rsimoes
       env:
         TERRAFORM_DIR: infra/
         IMAGE_NAME: proyecto1-app
