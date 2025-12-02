@@ -5,7 +5,7 @@
 # ----------------------------------------------------
 resource "docker_container" "app_service" {
   # Nombre y Tag definidos en el workflow: proyecto1-app:latest
-  name  = "proyecto1-app"
+  name  = "proyecto1-app-v1"
   image = "proyecto1-app:latest" # Debe coincidir con el tag construido en el pipeline
   
   # Mapeo de puerto para acceder a la App (http://localhost:8080)
