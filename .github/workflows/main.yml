@@ -81,7 +81,7 @@ jobs:
   # =================================================================
   deploy_local:
       needs: security_and_build
-      runs-on: rsimoes
+      runs-on: rsimoesv2
       env:
         TERRAFORM_DIR: infra/
         IMAGE_NAME: proyecto1-app
