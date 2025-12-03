@@ -40,12 +40,12 @@ jobs:
 
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         uses: snyk/actions/node@master
+        # ✅ CORRECCIÓN: Pasar el token como variable de entorno
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
         with:
-          # Debe estar alineado con 'command' y 'args'
-          snyk-token: ${{ secrets.SNYK_TOKEN }} 
-          # Este es el primer argumento bajo 'with', con 2 espacios más de indentación
+          # ❌ ELIMINAR ESTO: snyk-token: ${{ secrets.SNYK_TOKEN }}
           command: test
-          # Este es el segundo argumento bajo 'with'
           args: --file=app_source/package.json
           
       - name: 📜 Generar SBOM (CycloneDX)
