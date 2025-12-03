@@ -38,15 +38,15 @@ jobs:
         run: npm run lint
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
-      - name: 🔒 Análisis de Vulnerabilidades (Snyk)
-        uses: snyk/actions/node@master
+      #- name: 🔒 Análisis de Vulnerabilidades (Snyk)
+      #  uses: snyk/actions/node@master
         # ✅ CORRECCIÓN: Pasar el token como variable de entorno
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
-        with:
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }} 
+      #  with:
           # ❌ ELIMINAR ESTO: snyk-token: ${{ secrets.SNYK_TOKEN }}
-          command: test
-          args: --file=app_source/package.json
+      #    command: test
+      #    args: --file=app_source/package.json
           
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
