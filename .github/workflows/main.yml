@@ -39,13 +39,14 @@ jobs:
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          # ¡CORRECCIÓN! Indicamos la ruta exacta del package.json
-          args: --file=app_source/package.json
+        uses: snyk/actions/node@master
+        # 🗑️ ELIMINE EL BLOQUE 'env' AQUÍ 🗑️
+        with:
+          # ✅ CORRECCIÓN: Use 'snyk-token' dentro del bloque 'with'
+          snyk-token: ${{ secrets.SNYK_TOKEN }} 
+          command: test
+          # ¡CORRECCIÓN! Indicamos la ruta exacta del package.json
+          args: --file=app_source/package.json
 
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
