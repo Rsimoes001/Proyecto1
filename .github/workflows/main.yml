@@ -40,9 +40,8 @@ jobs:
 
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         uses: snyk/actions/node@master
-        # --- POSICIÓN CORREGIDA ---
+        # working-directory debe ir aquí, al mismo nivel que uses, env y with.
         working-directory: ${{ env.APP_SOURCE_DIR }} 
-        # --------------------------
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
