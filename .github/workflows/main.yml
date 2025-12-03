@@ -40,12 +40,12 @@ jobs:
 
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         uses: snyk/actions/node@master
-        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- ¡Asegúrate de incluir esto!
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
           args: --all-projects # Opcional, pero recomendado
+        working-directory: ${{ env.APP_SOURCE_DIR }} # <-- ¡Asegúrate de incluir esto!
                   
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
