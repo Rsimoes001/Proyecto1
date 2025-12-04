@@ -38,13 +38,17 @@ jobs:
         run: npm run lint
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
 
-      #- name: 🔒 Análisis de Vulnerabilidades (Snyk)
-      #  uses: snyk/actions/node@master
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  with:
-      #    command: test
-      #    args: --all-projects # Opcional, pero recomendado
+      - name: 🔒 Análisis de Vulnerabilidades (Snyk)
+        uses: snyk/actions/node@master
+        
+      - name: Verificar longitud token
+        run: echo "${{ secrets.SNYK_TOKEN }}" | wc -c
+        
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --all-projects # Opcional, pero recomendado
                   
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
