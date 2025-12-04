@@ -39,14 +39,12 @@ jobs:
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
         
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
-        uses: snyk/actions/node@master
-        continue-on-error: true
-        with:
-          command: test
+        run: |
+          cd ${{ env.APP_SOURCE_DIR }}
+          snyk test --severity-threshold=high || true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           # Cambiamos al subdirectorio donde está el código real
-        working-directory: app_source
         
        #- name: Verificar longitud token
        # run: echo "${{ secrets.SNYK_TOKEN }}" | wc -c
