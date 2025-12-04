@@ -44,11 +44,11 @@ jobs:
       - name: Verificar longitud token
         run: echo "${{ secrets.SNYK_TOKEN }}" | wc -c
         
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: --all-projects # Opcional, pero recomendado
+       # env:
+       #   SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+       # with:
+       #  command: test
+       #   args: --all-projects # Opcional, pero recomendado
                   
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
