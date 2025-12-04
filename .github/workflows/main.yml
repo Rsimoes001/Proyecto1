@@ -47,7 +47,7 @@ jobs:
           # Cambiamos al subdirectorio donde está el código real
         
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
-        uses: snyk/actions@master
+        uses: snyk/actions@v2
         continue-on-error: true
         with:
           command: test
