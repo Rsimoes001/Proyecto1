@@ -38,6 +38,10 @@ jobs:
         run: npm run lint
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
         
+        # 1. Nuevo paso: Instalar Snyk CLI Globalmente
+      - name: Instalar Snyk CLI
+        run: npm install -g snyk
+        
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         run: |
           cd ${{ env.APP_SOURCE_DIR }}
@@ -89,7 +93,7 @@ jobs:
   # =================================================================
   deploy_local:
       needs: security_and_build
-      runs-on: rsimoesv2
+      runs-on: ubuntu-latest
       env:
         TERRAFORM_DIR: infra/
         IMAGE_NAME: proyecto1-app
