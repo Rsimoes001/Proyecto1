@@ -40,8 +40,7 @@ jobs:
         
         # 1. Nuevo paso: Instalar Snyk CLI Globalmente
       - name: Instalar Snyk CLI
-        run: npm install -g snyk
-        
+        run: npm install -g snyk       
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
         run: |
           cd ${{ env.APP_SOURCE_DIR }}
