@@ -39,13 +39,24 @@ jobs:
         working-directory: ${{ env.APP_SOURCE_DIR }} # <-- FIX
         
       - name: 🔒 Análisis de Vulnerabilidades (Snyk)
-        run: |
-          cd ${{ env.APP_SOURCE_DIR }}
-          snyk test --severity-threshold=high || true
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          # Cambiamos al subdirectorio donde está el código real
+        uses: snyk/actions@2.16.0 # Usa la acción oficial de Snyk
+        continue-on-error: true # Permite que el workflow continúe incluso si encuentra vulnerabilidades
+        with:
+          command: test
+          args: '--severity-threshold=high'
+          # Es crucial decirle a Snyk dónde está el código y el package.json
+          working-directory: ${{ env.APP_SOURCE_DIR }}
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         
+      #- name: 🔒 Análisis de Vulnerabilidades (Snyk)
+      #  run: |
+      #    cd ${{ env.APP_SOURCE_DIR }}
+      #    snyk test --severity-threshold=high || true
+      #  env:
+      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          # Cambiamos al subdirectorio donde está el código real
+
       #- name: 🔒 Análisis de Vulnerabilidades (Snyk)
       #  uses: snyk/actions@2.16.0
       #  continue-on-error: true
