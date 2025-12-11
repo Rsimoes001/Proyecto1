@@ -15,7 +15,7 @@ resource "docker_network" "monitoring_network" {
 # 1. Contenedor de la Aplicación (Proyecto 1)
 # ----------------------------------------------------
 resource "docker_container" "app_service" {
-  name  = "proyecto1-app-v1"
+  name  = "proyecto1-app"
   image = "proyecto1-app:latest"
 
   # CONEXIÓN: Agregamos el contenedor a la red de monitoreo
