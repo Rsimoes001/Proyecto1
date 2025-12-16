@@ -45,16 +45,6 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           # Cambiamos al subdirectorio donde está el código real
-
-      #- name: 🔒 Análisis de Vulnerabilidades (Snyk)
-      #  uses: snyk/actions@2.16.0
-      #  continue-on-error: true
-      #  with:
-      #    command: test
-      #    args: '--severity-threshold=high'   # opcional pero recomendado
-      #  env:
-      #    SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      #  working-directory: ${{ env.APP_SOURCE_DIR }}
                   
       - name: 📜 Generar SBOM (CycloneDX)
         # Nota: Asumiendo que anchore/sbom-action@main es temporalmente estable
