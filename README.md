@@ -55,7 +55,25 @@ El pipeline (`.github/workflows/main.yml`) consta de dos jobs principales:
 
 ### 4.2 deploy_local
 
-Este job depende del éxito de 'security_and_build' y se ejecuta en un runner específico.
+Este job depende del éxito de 'security_and_build' y se ejecuta en un runner específico, la maquina local rotulada rsimoes.
+
+Primer paso, se configura el runner local:
+
+Ingresar a Settings --- Actions ---- Runners ---- New self-hosted runner
+
+- Seleccionar Sistema Operativo a correr
+Luego en la terminal local, correr los siguientes comandos:
+
+Download
+# Create a folder
+$ mkdir actions-runner && cd actions-runner# Download the latest runner package
+$ curl -o actions-runner-linux-x64-2.330.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.330.0/actions-runner-linux-x64-2.330.0.tar.gz# Optional: Validate the hash
+$ echo "af5c33fa94f3cc33b8e97937939136a6b04197e6dadfcfb3b6e33ae1bf41e79a  actions-runner-linux-x64-2.330.0.tar.gz" | shasum -a 256 -c# Extract the installer
+$ tar xzf ./actions-runner-linux-x64-2.330.0.tar.gz
+Configure
+# Create the runner and start the configuration experience
+$ ./config.sh --url https://github.com/Rsimoes001/Proyecto1 --token BQWOTPQGWN4XYZWIWKLDC33JISGJQ  # Tener en cuenta colocar el token que github nos arroje en el momento de configurar el runner.   
+$ ./run.sh
 
 1.  **Re-construcción Docker**: Vuelve a construir la imagen en el runner de despliegue.
 2.  [cite_start]**Terraform Init**: Inicializa Terraform, usando la versión 1.5.7 y el proveedor Docker[cite: 10].
